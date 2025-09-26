@@ -101,9 +101,24 @@
   
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.min.js"></script>
   <script>
-    const contractAddress = "YOUR_CONTRACT_ADDRESS_HERE";
+    const contractAddress = "0x94372AA428BaA34c16bb2bbAaBb606838a2F639F";
     const abi = [
-      "function verifyCertificate(bytes32 certificateHash) view returns (bool, uint256)"
+ 
+  {
+    "inputs":[{"internalType":"bytes32","name":"certificateHash","type":"bytes32"}],
+    "name":"mintCertificate",
+    "outputs":[],
+    "stateMutability":"nonpayable",
+    "type":"function"
+  },
+  {
+    "inputs":[{"internalType":"bytes32","name":"certificateHash","type":"bytes32"}],
+    "name":"verifyCertificate",
+    "outputs":[{"internalType":"bool","name":"","type":"bool"},{"internalType":"uint256","name":"","type":"uint256"}],
+    "stateMutability":"view",
+    "type":"function"
+  }
+
     ];
 
     const provider = new ethers.providers.Web3Provider(window.ethereum);
