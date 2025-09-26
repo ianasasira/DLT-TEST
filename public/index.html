@@ -4,31 +4,21 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>DLT APP</title>
-  <meta name="description" content="A Blockchain Decentralized Application For Fighting Counterfeited Documents And
-   Products Such As Land Titles, Food Products, Cosmetics
-    , Pharmaceuticals, Academic Documents & More" />
+  <meta name="description" content="A Blockchain Decentralized Application For Fighting Counterfeited Documents And Products Such As Land Titles, Food Products, Cosmetics, Pharmaceuticals, Academic Documents & More" />
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <header class="container">
     <div class="nav">
       <div class="brand">
-        <div class="logo">BC</div>
+        <div class="logo">DLT</div>
         <div class="brand-text">
           <div class="brand-title">THE DIGITAL LAND TITLE</div>
           <div class="brand-sub">Secured Powered Application To Promote Property Integrity</div>
         </div>
       </div>
 
-      <nav>
-        <ul class="nav-list">
-    
-          
-        </ul>
-      </nav>
-
       <div class="actions">
-   
         <a class="cta" href="register.html">REGISTER YOUR PROPERTY</a>
       </div>
     </div>
@@ -37,23 +27,24 @@
   <main class="container">
     <section class="hero">
       <div class="hero-left">
-        <h1>Today You Can Verify Any Document, Product Or Property TO Ensure It Is From The Right Source.</h1>
-        <p class="lead">We issue an exact verification process that is from the source of the property in relation to its owner.</p>
+        <h1>Verify Any Document, Product Or Property To Ensure It Is From The Right Source</h1>
+        <p class="lead">We issue an exact verification process from the source of the property in relation to its owner.</p>
 
         <div class="actions-row">
-        <input field="" id="certificateHash" placeholder="Enter The Proper ID" >
+          <input id="certificateHash" placeholder="Enter Certificate Hash or Text" size="70"/>
           <button class="btn primary" id="verifyBtn">Check Property</button>
-          <p id="result"></p>
         </div>
+        <p id="result" class="lead"></p>
+
         <br><br>
         <div class="actions-row">
-        <button class="btn primary">Scan Property QR Code</button>
+          <button class="btn primary">Scan Property QR Code</button>
         </div>
 
         <div class="trusted">Ensure Mobile Data is Switched On</div>
       </div>
 
-      <aside class="card sample-card">
+     <!--- <aside class="card sample-card">
         <div class="card-head">
           <div class="card-title">Sample Certificate</div>
           <div class="card-date">Issued Sep 25, 2025</div>
@@ -68,13 +59,13 @@
             <span class="verified">Verified on-chain</span>
           </div>
         </div>
-      </aside>
+      </aside>-->
     </section>
 
     <section class="features">
       <div class="feature card">
         <h3>Trusted & Secure</h3>
-        <p>Document details and stored securely and cryptographucally .</p>
+        <p>Document details are stored securely and cryptographically.</p>
       </div>
 
       <div class="feature card">
@@ -84,7 +75,7 @@
 
       <div class="feature card">
         <h3>Fast & Reliable</h3>
-        <p>Verify Documents in record speed and stored data is kept on distributed servers for a long time.</p>
+        <p>Verify documents in record speed. Data is kept on distributed servers for long-term access.</p>
       </div>
     </section>
   </main>
@@ -95,42 +86,62 @@
         <strong>DLT</strong>
         <div class="muted">Secure Software · For Properties</div>
       </div>
-      <div class="muted">© 2025 Mukiibi Micheal Kirinnya& Asasira Ian Tusiime</div>
+      <div class="muted">© 2025 Mukiibi Micheal Kirinnya & Asasira Ian Tusiime</div>
     </div>
   </footer>
   
-  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.min.js"></script>
+  <!-- Ethers.js -->
+  <script  src="libs/ethers.umd.min.js"></script>
   <script>
-    const contractAddress = "0x94372AA428BaA34c16bb2bbAaBb606838a2F639F";
+    const contractAddress = "0xdB0329Ffe02e9b60ec9d8Da41ca291de0F943E15";
     const abi = [
- 
-  {
-    "inputs":[{"internalType":"bytes32","name":"certificateHash","type":"bytes32"}],
-    "name":"mintCertificate",
-    "outputs":[],
-    "stateMutability":"nonpayable",
-    "type":"function"
-  },
-  {
-    "inputs":[{"internalType":"bytes32","name":"certificateHash","type":"bytes32"}],
-    "name":"verifyCertificate",
-    "outputs":[{"internalType":"bool","name":"","type":"bool"},{"internalType":"uint256","name":"","type":"uint256"}],
-    "stateMutability":"view",
-    "type":"function"
-  }
-
+      {
+        "inputs":[{"internalType":"bytes32","name":"certificateHash","type":"bytes32"}],
+        "name":"mintCertificate",
+        "outputs":[],
+        "stateMutability":"nonpayable",
+        "type":"function"
+      },
+      {
+        "inputs":[{"internalType":"bytes32","name":"certificateHash","type":"bytes32"}],
+        "name":"verifyCertificate",
+        "outputs":[{"internalType":"bool","name":"","type":"bool"},{"internalType":"uint256","name":"","type":"uint256"}],
+        "stateMutability":"view",
+        "type":"function"
+      }
     ];
 
     const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const contract = new ethers.Contract(contractAddress, abi, provider);
 
     document.getElementById("verifyBtn").addEventListener("click", async () => {
-      const hashInput = document.getElementById("certificateHash").value;
-      const hashBytes = ethers.utils.id(hashInput);
-      const [exists, tokenId] = await contract.verifyCertificate(hashBytes);
-      document.getElementById("result").textContent = exists
-        ? `✅ Valid certificate! Token ID: ${tokenId}`
-        : "❌ Certificate not found!";
+      const resultEl = document.getElementById("result");
+      try {
+        await provider.send("eth_requestAccounts", []);
+        const signer = provider.getSigner();
+        const contract = new ethers.Contract(contractAddress, abi, signer);
+
+        const hashInput = document.getElementById("certificateHash").value.trim();
+
+        if (!hashInput) {
+          resultEl.textContent = "⚠️ Please enter a hash or text.";
+          return;
+        }
+
+        let hashBytes;
+        if (ethers.utils.isHexString(hashInput, 32)) {
+          hashBytes = hashInput; // user provided a valid bytes32 hash
+        } else {
+          hashBytes = ethers.utils.id(hashInput); // hash plain text into bytes32
+        }
+
+        const [exists, tokenId] = await contract.verifyCertificate(hashBytes);
+        resultEl.textContent = exists
+          ? `✅ Valid certificate! Token ID: ${tokenId}`
+          : "❌ Certificate not found!";
+      } catch (err) {
+        console.error(err);
+        resultEl.textContent = "⚠️ Error verifying certificate. Check console for details.";
+      }
     });
   </script>
 </body>
