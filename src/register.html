@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Register — BlockCerts Demo</title>
+  <link rel="stylesheet" href="style2.css">
+</head>
+<body>
+  <header class="container">
+    <div class="nav">
+      <div class="brand">
+        <div class="logo">BC</div>
+        <div class="brand-text">
+          <div class="brand-title">DLT</div>
+          <div class="brand-sub">Secured Powered Application To Promote Property Integrity</div>
+        </div>
+         <ul class="nav-list">
+    
+          <a href="index.html">Home</a>
+        </ul>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="form-section">
+      <h1 class="form-title">Register</h1>
+      <p class="form-sub">Enter The Property Id Or Docuement Id.</p>
+
+      <form class="card form-card">
+        <input type="text" class="input" id="certificateCode"  placeholder="Enter Doc Or Property Id" required />
+        <button type="submit"  id="mintBtn" class="btn primary">Register</button>
+      </form>
+    </section>
+  </main>
+
+  <footer class="container footer">
+    <div class="footer-inner">
+      <div>
+        <strong>DLT</strong>
+        <div class="muted">Secure Software · For Properties</div>
+      </div>
+      <div class="muted">© 2025 Mukiibi Micheal Kirinnya & Ian Asasira Tusiime</div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.min.js"></script>
+  <script>
+    const contractAddress = "YOUR_CONTRACT_ADDRESS_HERE";
+    const abi = [
+      "function mintCertificate(bytes32 certificateHash) external",
+      "function verifyCertificate(bytes32 certificateHash) view returns (bool, uint256)"
+    ];
+
+    async function connectWallet() {
+      if (window.ethereum) {
+        await window.ethereum.request({ method: 'eth_requestAccounts' });
+        return new ethers.providers.Web3Provider(window.ethereum).getSigner();
+      } else {
+        alert("MetaMask is required to register certificates");
+      }
+    }
+
+    document.getElementById("mintBtn").addEventListener("click", async () => {
+      const code = document.getElementById("certificateCode").value;
+      if (!code) {
+        alert("Enter a certificate code");
+        return;
+      }
+
+      const hash = ethers.utils.id(code); // convert to bytes32
+      const signer = await connectWallet();
+      const contract = new ethers.Contract(contractAddress, abi, signer);
+
+      try {
+        const tx = await contract.mintCertificate(hash);
+        document.getElementById("status").textContent = "⏳ Transaction sent, waiting for confirmation...";
+        await tx.wait();
+        document.getElementById("status").textContent = `✅ Certificate registered! Hash: ${hash}`;
+      } catch (err) {
+        console.error(err);
+        document.getElementById("status").textContent = "❌ Error registering certificate. Maybe it already exists?";
+      }
+    });
+  </script>
+</body>
+</html>
